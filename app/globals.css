@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Defaults (used before ThemeBoot hydrates) */
+:root {
+  --bc-bg: #F0D9B5;              /* page background */
+  --bc-board-light: #EAEAEA;     /* board light */
+  --bc-board-dark: #4E6E81;      /* board dark */
+  --bc-notation: rgba(0,0,0,.55);
+  --bc-header-bg: #FBF5EB; /* light gray w/ translucency */
+  --bc-header-fg: #111111;               /* black-ish */
+}
+
+/* Optional: nicer fade when theme changes */
+* { transition: background-color .18s linear, color .18s linear; }
+
+body {
+  background-color: var(--bc-bg);
+  color: rgb(17 24 39);          /* your old --fg */
+}
+
+html.dark {
+  /* darker header in dark mode */
+  --bc-header-bg: rgba(28, 28, 30, 0.9); /* iOS-style dark, tweak as you like */
+  --bc-header-fg: #ffffff;               /* white header text */
+}
+html.dark .site-header {
+  border-color: rgba(255,255,255,0.08);
+}
+/* basic dark mode text contrast (ThemeBoot toggles the .dark class on <html>) */
+html.dark body {
+  color: rgb(229 231 235);
+}
+
+.site-header {
+  background-color: var(--bc-header-bg);
+  color: var(--bc-header-fg);
+  backdrop-filter: saturate(180%) blur(8px);
+}
+
+/* Logo heading style for "Brute Chess" */
+.logo-heading {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold',
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: 0.08em; /* optional – tweak or remove if too spaced */
+}
