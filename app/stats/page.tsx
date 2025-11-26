@@ -462,9 +462,12 @@ export default function StatsPage() {
                     deck_id: string | null;
                 };
 
+                const openingsTyped = (openingRows ?? []) as OpeningRow[];
+
                 const openingsById = new Map<string, OpeningRow>(
-                    (openingRows ?? []).map(o => [o.id, o as OpeningRow]),
+                    openingsTyped.map((o) => [o.id, o]),
                 );
+
 
                 const joined: LineWithSide[] = allLines.map(line => {
                     const op = line.opening_id
