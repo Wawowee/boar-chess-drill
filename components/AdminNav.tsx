@@ -50,12 +50,6 @@ export default function AdminNav() {
             >
                 Manage Openings
             </Link>
-            <Link
-                href="/admin/import-pgn"
-                className="hover:underline transition-transform hover:-translate-y-0.5"
-            >
-                Import PGN
-            </Link>
         </>
     )
 }
