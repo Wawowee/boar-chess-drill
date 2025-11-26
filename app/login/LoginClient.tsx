@@ -18,20 +18,20 @@ export default function LoginClient() {
     useEffect(() => {
         if (!ready) return
         let cleanup = () => { }
-            ; (async () => {
-                const { data: { session } } = await supabase.auth.getSession()
-                if (session) { router.replace(next); return }
-                const { data: sub } = supabase.auth.onAuthStateChange(
-                    (event: AuthChangeEvent, session: Session | null) => {
-                        if (event === 'SIGNED_IN' && session) router.replace(next)
-                    }
-                )
-                cleanup = () => sub.subscription.unsubscribe()
-            })()
+        ;(async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) { router.replace(next); return }
+            const { data: sub } = supabase.auth.onAuthStateChange(
+                (event: AuthChangeEvent, session: Session | null) => {
+                    if (event === 'SIGNED_IN' && session) router.replace(next)
+                }
+            )
+            cleanup = () => sub.subscription.unsubscribe()
+        })()
         return () => cleanup()
     }, [ready, router, next])
 
-    if (!ready) return <div className="p-6">Loading…</div>
+    if (!ready) return <div className="p-6">Loadingâ€¦</div>
 
     return (
         <div className="max-w-4xl mx-auto p-6">
@@ -121,7 +121,7 @@ function SignInCard({ next }: { next: string }) {
                     disabled={pending}
                     className="w-full py-2 rounded bg-black text-white disabled:opacity-60"
                 >
-                    {pending ? 'Signing in…' : 'Sign in'}
+                    {pending ? 'Signing inâ€¦' : 'Sign in'}
                 </button>
 
                 <button
@@ -130,11 +130,11 @@ function SignInCard({ next }: { next: string }) {
                     onClick={sendMagicLink}
                     className="w-full py-2 rounded border disabled:opacity-60"
                 >
-                    {pending ? 'Sending…' : 'Send magic link'}
+                    {pending ? 'Sendingâ€¦' : 'Send magic link'}
                 </button>
 
                 <div className="text-xs text-gray-500 text-center">
-                    After sign-in you’ll go to <span className="font-mono">{next}</span>.
+                    After sign-in youâ€™ll go to <span className="font-mono">{next}</span>.
                 </div>
             </form>
         </div>
@@ -175,9 +175,9 @@ function SignUpCard({ next }: { next: string }) {
                 setErr(error.message)
             } else {
                 if (!data.session) {
-                    setMsg('Check your email to confirm your account. You’ll be redirected after confirming.')
+                    setMsg('Check your email to confirm your account. Youâ€™ll be redirected after confirming.')
                 } else {
-                    setMsg('Account created. Redirecting…')
+                    setMsg('Account created. Redirectingâ€¦')
                 }
             }
         } finally { setPending(false) }
@@ -220,11 +220,11 @@ function SignUpCard({ next }: { next: string }) {
                     disabled={pending}
                     className="w-full py-2 rounded bg-gray-900 text-white disabled:opacity-60"
                 >
-                    {pending ? 'Creating…' : 'Sign up'}
+                    {pending ? 'Creatingâ€¦' : 'Sign up'}
                 </button>
 
                 <div className="text-xs text-gray-500 text-center">
-                    You’ll be redirected to <span className="font-mono">{next}</span> after confirming (if required).
+                    Youâ€™ll be redirected to <span className="font-mono">{next}</span> after confirming (if required).
                 </div>
             </form>
         </div>
