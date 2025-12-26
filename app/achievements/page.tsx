@@ -184,9 +184,10 @@ const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null)
           .from('lines')
           .select('id,is_active,line_name,openings(name,side,deck_id)'),
         supabase
-          .from('decks')
-          .select('id,name')
-          .order('created_at', { ascending: true }),
+              .from('decks')
+              .select('id,name')
+              .eq('is_hidden', false)
+              .order('created_at', { ascending: true }),
         supabase
           .from('user_settings')
           .select('current_deck_id')
@@ -201,15 +202,17 @@ const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null)
       if (!lsErr) setLines((ls ?? []) as LineWithSide[])
       if (!deckErr) setDecks((deckRows ?? []) as Deck[])
 
-const currentDeckId = settingsErr
-  ? null
-  : (settings?.current_deck_id ?? null)
+        const currentDeckId = settingsErr ? null : (settings?.current_deck_id ?? null)
 
-// prefer user’s current_deck_id, otherwise first deck, otherwise null
-const defaultDeckId =
-  currentDeckId || ((deckRows && deckRows[0]?.id) || null)
+        const visibleDeckRows = (deckRows ?? []) as Deck[]
+        const currentIsVisible = !!currentDeckId && visibleDeckRows.some(d => d.id === currentDeckId)
 
-setSelectedDeckId(defaultDeckId)
+        const defaultDeckId = currentIsVisible
+            ? currentDeckId
+            : (visibleDeckRows[0]?.id ?? null)
+
+        setSelectedDeckId(defaultDeckId)
+
 
 
       setLoading(false)
@@ -433,10 +436,9 @@ const masteryAchievements: Achievement[] = useMemo(() => {
             </span>
 <select
   className="text-sm px-2 py-1 border rounded-lg bg-white"
-  value={selectedDeckId ?? ''}
-  onChange={e =>
-    setSelectedDeckId(e.target.value || null)
-  }
+value={selectedDeckId ?? (decks[0]?.id ?? '')}
+onChange={e => setSelectedDeckId(e.target.value)}
+
   disabled={loading || decks.length === 0}
 >
   {decks.map(d => (

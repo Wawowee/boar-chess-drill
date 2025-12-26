@@ -205,7 +205,7 @@ export default function StatsPage() {
     const [loading, setLoading] = useState(true)
     const [uid, setUid] = useState<string | null>(null)
     const [decks, setDecks] = useState<Deck[]>([])
-    const [selectedDeckId, setSelectedDeckId] = useState<string | 'all' | null>('all')
+    const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null)
     const [initialDeckId, setInitialDeckId] = useState<string | null>(null)
     const [allowedLineIds, setAllowedLineIds] = useState<Set<string> | null>(null)
 
@@ -221,10 +221,12 @@ export default function StatsPage() {
                 }
 
                 // "All decks" → no deck filter on events/reviews
-                if (!selectedDeckId || selectedDeckId === 'all') {
-                    setAllowedLineIds(null)
+                // No deck selected yet → show nothing
+                if (!selectedDeckId) {
+                    setAllowedLineIds(new Set())
                     return
                 }
+
 
                 const { data, error } = await supabase
                     .from('lines')
@@ -507,15 +509,19 @@ export default function StatsPage() {
             // If we still don't have an initial deck, try Brute 1000 Opening Challenge
             if (!initialDeckId) {
                 const bruteDeck = visibleDecks.find(
-                    d => d.name === 'Brute 1000 Opening Challenge'
+                    d => d.name === 'BruteChess 1000 Opening Challenge'
                 );
                 if (bruteDeck) {
                     initialDeckId = bruteDeck.id;
                 }
             }
 
-            setInitialDeckId(initialDeckId);
-            setSelectedDeckId(initialDeckId || 'all');
+            // pick a real deck if possible
+            const finalDeckId = initialDeckId || visibleDecks[0]?.id || null
+
+            setInitialDeckId(finalDeckId)
+            setSelectedDeckId(finalDeckId)
+
 
 
 
@@ -536,7 +542,7 @@ export default function StatsPage() {
 
     const linesFiltered = useMemo(() => {
         if (!linesWithSide) return null
-        if (!selectedDeckId || selectedDeckId === 'all') return linesWithSide
+        if (!selectedDeckId) return []
         return linesWithSide.filter(
             l => l.openings?.deck_id === selectedDeckId
         )
@@ -952,9 +958,6 @@ export default function StatsPage() {
                         </div>
 
                         {/* deck label below heading */}
-                        {selectedDeckId === 'all' && (
-                            <div className="text-sm text-gray-500">All decks</div>
-                        )}
                         {selectedDeckId !== 'all' && selectedDeckId && (
                             <div className="text-sm text-gray-500">
                                 Deck:{' '}
@@ -970,15 +973,12 @@ export default function StatsPage() {
                         <span className="text-xs text-gray-500">View stats for</span>
                         <select
                             className="text-sm px-2 py-1 border rounded-lg bg-white dark:bg-slate-900"
-                            value={selectedDeckId ?? 'all'}
-                            onChange={e =>
-                                setSelectedDeckId(
-                                    (e.target.value || 'all') as 'all' | string
-                                )
-                            }
+                            value={selectedDeckId ?? ''}
+                            onChange={e => setSelectedDeckId(e.target.value || null)}
+
                             disabled={loading || decks.length === 0}
                         >
-                            <option value="all">All decks</option>
+                            
                             {decks.map(d => (
                                 <option key={d.id} value={d.id}>
                                     {d.name}

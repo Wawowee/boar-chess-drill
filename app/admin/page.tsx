@@ -128,6 +128,7 @@ export default function AdminPage() {
         variationName: string
         side: 'white' | 'black' | 'both'
         movesText: string
+        lichessResource?: string
     }
 
     function parseTaggedPgn(raw: string): ParsedPgnOpening[] {
@@ -142,6 +143,7 @@ export default function AdminPage() {
                     variationName: current.variationName || 'Imported line',
                     side: current.side,
                     movesText: current.movesText.trim(),
+                    lichessResource: current.lichessResource?.trim() || undefined,
                 })
             }
             current = null
@@ -166,6 +168,7 @@ export default function AdminPage() {
                         variationName: '',
                         side: 'white',
                         movesText: '',
+                        lichessResource: '',
                     }
                 } else if (tag === 'Variation') {
                     if (!current) {
@@ -174,6 +177,7 @@ export default function AdminPage() {
                             variationName: '',
                             side: 'white',
                             movesText: '',
+                            lichessResource: '',
                         }
                     }
                     current.variationName = value
@@ -184,12 +188,24 @@ export default function AdminPage() {
                             variationName: '',
                             side: 'white',
                             movesText: '',
+                            lichessResource: '',
                         }
                     }
                     const v = value.toLowerCase()
                     if (v === 'white' || v === 'black' || v === 'both') {
                         current.side = v
                     }
+                } else if (tag === 'LichessResource') {
+                    if (!current) {
+                        current = {
+                            openingName: '',
+                            variationName: '',
+                            side: 'white',
+                            movesText: '',
+                            lichessResource: '',
+                        }
+                    }
+                    current.lichessResource = value
                 }
 
                 continue
@@ -393,8 +409,7 @@ export default function AdminPage() {
                 }
                 openingId = ins.id
             }
-
-            const { error: lineErr } = await supabase
+            const { data: lineIns, error: lineErr } = await supabase
                 .from('lines')
                 .insert({
                     opening_id: openingId,
@@ -404,13 +419,36 @@ export default function AdminPage() {
                 .select('id')
                 .single()
 
-            if (lineErr) {
+            if (lineErr || !lineIns?.id) {
                 console.error('Error adding line during import', lineErr)
                 skipped++
                 continue
             }
 
+            // If PGN provided a LichessResource tag, create a link resource for this line
+            const lichessUrl = entry.lichessResource?.trim()
+            if (lichessUrl) {
+                const { error: resErr } = await supabase
+                    .from('opening_resources')
+                    .insert({
+                        opening_id: openingId,
+                        line_id: lineIns.id,
+                        kind: 'link',
+                        title: 'Lichess analysis',
+                        url: lichessUrl,
+                        content: null,
+                        sort_order: 0,
+                        is_active: true,
+                    })
+
+                if (resErr) {
+                    // Don’t fail the whole line import—just log it.
+                    console.error('Error adding Lichess resource during import', resErr)
+                }
+            }
+
             createdLines++
+
         }
 
         setImportMsg(

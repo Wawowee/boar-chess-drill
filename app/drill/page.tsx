@@ -547,7 +547,7 @@ export default function DrillPage() {
                 const { data: bruteDeck, error: bruteErr } = await supabase
                     .from('decks')
                     .select('id, name')
-                    .eq('name', 'Brute 1000 Opening Challenge')
+                    .eq('name', 'BruteChess 1000 Opening Challenge')
                     .maybeSingle();
 
                 if (!bruteErr && bruteDeck) {
